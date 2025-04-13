@@ -2,10 +2,12 @@
 	<form>
 		<div class="mb-3">
 			<label for="title" class="form-label">제목</label>
+			<!-- autofocus -->
 			<input
+				v-focus
+				v-color="'blue'"
 				type="text"
 				class="form-control"
-				autofocus
 				id="title"
 				:value="title"
 				@input="$emit('update:title', $event.target.value)"
@@ -29,7 +31,11 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+// const vFocus = {
+// 	mounted: el => {
+// 		el.focus();
+// 	},
+// };
 
 defineProps({
 	title: {

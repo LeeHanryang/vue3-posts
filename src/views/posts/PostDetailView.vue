@@ -1,9 +1,17 @@
 <template>
-	<div>
+	<AppLoading v-if="loading" />
+
+	<AppError v-else-if="error" :message="error.message" />
+
+	<div v-else>
 		<h2>{{ post.title }}</h2>
 		<p>{{ post.contents }}</p>
-		<p class="text-muted">{{ post.createdAt }}</p>
+		<p class="text-muted">
+			{{ $dayjs(post.createdAt).format('YYYY.MM.DD HH:mm:ss') }}
+		</p>
 		<hr class="my-4" />
+
+		<AppError v-if="removeError" :message="removeError.message" />
 
 		<div class="row g-2">
 			<div class="col-auto">
@@ -24,8 +32,20 @@
 				</button>
 			</div>
 			<div class="col-auto">
-				<button class="btn btn-outline-danger" @click="handlePostDelete">
-					삭제
+				<button
+					class="btn btn-outline-danger"
+					@click="handlePostDelete"
+					:disabled="removeLoading"
+				>
+					<template v-if="removeLoading">
+						<span
+							class="spinner-grow spinner-grow-sm"
+							role="status"
+							aria-hidden="true"
+						></span>
+						<span class="visually-hidden">Loading...</span>
+					</template>
+					<template v-else>삭제</template>
 				</button>
 			</div>
 		</div>
@@ -36,6 +56,7 @@
 import { useRouter } from 'vue-router';
 import { getPost, deletePost } from '@/api/post';
 import { ref, onMounted } from 'vue';
+import useAlert from '@/composables/alert';
 
 const props = defineProps({
 	id: {
@@ -47,6 +68,8 @@ const props = defineProps({
 const router = useRouter();
 // const route = useRoute();
 
+const { vSuccess } = useAlert();
+
 /*
  * ref
  * 장점) 객체 할당 가능
@@ -55,7 +78,14 @@ const router = useRouter();
  * 장점) post.title, post.contents, post.createdAt 접근 편리
  * 단점) 객체 할당 불가능
  */
-const post = ref({});
+const post = ref({
+	title: null,
+	content: null,
+	createAt: null,
+});
+
+const error = ref(null);
+const loading = ref(false);
 // const post = reactive({});
 
 // const id = route.params.id;
@@ -67,17 +97,14 @@ const setPost = ({ title, contents, createdAt }) => {
 };
 
 const fetchPost = async () => {
-	// const data = await getPost(props.id);
-	// post.value = { ...data };
-
-	// post.title = data.title;
-	// post.contents = data.contents;
-	// post.createdAt = data.createdAt;
 	try {
+		loading.value = true;
 		const { data } = await getPost(props.id);
 		setPost(data);
-	} catch (error) {
-		console.error(error);
+	} catch (err) {
+		error.value = err;
+	} finally {
+		loading.value = false;
 	}
 };
 
@@ -96,16 +123,25 @@ const handlePostEdit = () => {
 	});
 };
 
+const removeError = ref(null);
+const removeLoading = ref(false);
+
 const handlePostDelete = async () => {
 	try {
+		removeLoading.value = true;
+
 		if (confirm('삭제하시겠습니까?') === false) return;
 
 		await deletePost(props.id);
+		vSuccess('삭제가 완료되었습니다.');
 		router.push({
 			name: 'posts',
 		});
-	} catch (error) {
-		console.error(error);
+	} catch (err) {
+		console.error(err);
+		removeError.value = err;
+	} finally {
+		removeLoading.value = false;
 	}
 };
 
