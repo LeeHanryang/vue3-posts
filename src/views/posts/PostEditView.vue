@@ -10,7 +10,7 @@
 		<PostForm
 			v-model:title="post.title"
 			v-model:contents="post.contents"
-			@submit.prevent="handleUpdate"
+			@submit.prevent="edit"
 		>
 			<template #actions>
 				<button
@@ -37,65 +37,43 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
-import { getPost, updatePost } from '@/api/post';
-import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import PostForm from '@/components/posts/PostForm.vue';
 import useAlert from '@/composables/alert';
+import { useAxios } from '@/hooks/useAxios';
 
-const error = ref(null);
-const loading = ref(false);
-
-const props = defineProps({
-	id: {
-		type: Number,
-		required: true,
-	},
-});
-
+const route = useRoute();
 const router = useRouter();
-// const route = useRoute();
+const id = route.params.id;
 
-const { vAlert, vSuccess } = useAlert();
+const { vSuccess, vAlert } = useAlert();
+const { data: post, error, loading } = useAxios(`/posts/${id}`);
 
-const post = ref({
-	title: '',
-	contents: '',
-});
+const {
+	error: editError,
+	loading: editLoading,
+	execute,
+} = useAxios(
+	`/posts/${id}`,
+	{
+		method: 'patch',
+		data: { ...post.value },
+	},
+	{
+		immediate: false,
+		onSuccess: () => {
+			router.push({ name: 'posts.detail', params: { id } });
+			vSuccess('수정이 완료되었습니다.');
+		},
+		onError: err => {
+			vAlert(err.message);
+		},
+	},
+);
 
-const handleDetail = () => {
-	router.push({ name: 'posts.detail', params: { id: props.id } });
+const edit = () => {
+	execute({ ...post.value });
 };
-
-const editError = ref(null);
-const editLoading = ref(false);
-
-const handleUpdate = async () => {
-	try {
-		editLoading.value = true;
-		await updatePost(props.id, { ...post.value });
-		router.push({ name: 'posts.detail', params: { id: props.id } });
-		vSuccess('수정이 완료되었습니다.');
-	} catch (err) {
-		vAlert('수정에 실패하였습니다.');
-		editError.value = err;
-	} finally {
-		editLoading.value = false;
-	}
-};
-
-onMounted(async () => {
-	try {
-		loading.value = true;
-		const { data } = await getPost(props.id);
-		post.value = data;
-	} catch (error) {
-		console.error(error);
-		vAlert(error.message);
-	} finally {
-		loading.value = false;
-	}
-});
 </script>
 
 <style lang="scss" scoped></style>

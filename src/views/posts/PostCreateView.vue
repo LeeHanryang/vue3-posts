@@ -35,15 +35,12 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import { createPost } from '@/api/post';
 import { ref } from 'vue';
 import PostForm from '@/components/posts/PostForm.vue';
 import useAlert from '@/composables/alert';
+import { useAxios } from '@/hooks/useAxios';
 
 const { vAlert, vSuccess } = useAlert();
-
-const error = ref(null);
-const loading = ref(false);
 
 const post = ref({
 	title: '',
@@ -57,18 +54,26 @@ const handleList = () => {
 	router.push('/posts');
 };
 
+const { error, loading, execute } = useAxios(
+	'/posts',
+	{
+		method: 'post',
+		data: { ...post.value },
+	},
+	{
+		immediate: false,
+		onSuccess: () => {
+			router.push('/posts');
+			vSuccess('등록이 완료되었습니다.');
+		},
+		onError: err => {
+			vAlert(err.message);
+		},
+	},
+);
+
 const handleSave = async () => {
-	try {
-		loading.value = true;
-		await createPost(post.value);
-		router.push('/posts');
-		vSuccess('등록이 완료되었습니다.');
-	} catch (err) {
-		error.value = err;
-		vAlert('등록에 실패하였습니다.');
-	} finally {
-		loading.value = false;
-	}
+	execute({ ...post.value });
 };
 
 const visibleForm = ref(true);

@@ -5,6 +5,7 @@
 
 	<div v-else>
 		<h2>{{ post.title }}</h2>
+		<p>id: {{ props.id }}, isOdd: {{ isOdd }}, isEven: {{ isEven }}</p>
 		<p>{{ post.contents }}</p>
 		<p class="text-muted">
 			{{ $dayjs(post.createdAt).format('YYYY.MM.DD HH:mm:ss') }}
@@ -34,7 +35,7 @@
 			<div class="col-auto">
 				<button
 					class="btn btn-outline-danger"
-					@click="handlePostDelete"
+					@click="remove"
 					:disabled="removeLoading"
 				>
 					<template v-if="removeLoading">
@@ -54,58 +55,49 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import { getPost, deletePost } from '@/api/post';
-import { ref, onMounted } from 'vue';
 import useAlert from '@/composables/alert';
+import { useAxios } from '@/hooks/useAxios';
+import { computed, toRefs } from 'vue';
+import { useNumber } from '@/composables/number';
 
 const props = defineProps({
-	id: {
-		type: [String, Number],
-		required: true,
-	},
+	id: [String, Number],
 });
 
 const router = useRouter();
-// const route = useRoute();
+const { id: idRef } = toRefs(props);
+// const idRef = toRef(props, 'id');
+const { vSuccess, vAlert } = useAlert();
+const url = computed(() => `/posts/${props.id}`);
+const { data: post, error, loading } = useAxios(url);
 
-const { vSuccess } = useAlert();
+const { isOdd, isEven } = useNumber(idRef);
 
-/*
- * ref
- * 장점) 객체 할당 가능
- * 단점) post.value.title, post.value.contents, post.value.createdAt 접근 불편
- * reactive
- * 장점) post.title, post.contents, post.createdAt 접근 편리
- * 단점) 객체 할당 불가능
- */
-const post = ref({
-	title: null,
-	content: null,
-	createAt: null,
-});
+const {
+	error: removeError,
+	loading: removeLoading,
+	execute,
+} = useAxios(
+	`/posts/${props.id}`,
+	{
+		method: 'delete',
+		data: { ...post.value },
+	},
+	{
+		immediate: false,
+		onSuccess: () => {
+			router.push('/posts');
+			vSuccess('삭제가 완료되었습니다.');
+		},
+		onError: err => {
+			vAlert(err.message);
+		},
+	},
+);
 
-const error = ref(null);
-const loading = ref(false);
-// const post = reactive({});
-
-// const id = route.params.id;
-
-const setPost = ({ title, contents, createdAt }) => {
-	post.value.title = title;
-	post.value.contents = contents;
-	post.value.createdAt = createdAt;
-};
-
-const fetchPost = async () => {
-	try {
-		loading.value = true;
-		const { data } = await getPost(props.id);
-		setPost(data);
-	} catch (err) {
-		error.value = err;
-	} finally {
-		loading.value = false;
-	}
+const remove = () => {
+	if (confirm('삭제하시겠습니까?') === false) return;
+	execute();
 };
 
 const handlePostList = () => {
@@ -122,33 +114,6 @@ const handlePostEdit = () => {
 		},
 	});
 };
-
-const removeError = ref(null);
-const removeLoading = ref(false);
-
-const handlePostDelete = async () => {
-	try {
-		removeLoading.value = true;
-
-		if (confirm('삭제하시겠습니까?') === false) return;
-
-		await deletePost(props.id);
-		vSuccess('삭제가 완료되었습니다.');
-		router.push({
-			name: 'posts',
-		});
-	} catch (err) {
-		console.error(err);
-		removeError.value = err;
-	} finally {
-		removeLoading.value = false;
-	}
-};
-
-onMounted(async () => {
-	// post.value = await getPost(route.params.id);
-	fetchPost();
-});
 </script>
 
 <style lang="scss" scoped></style>

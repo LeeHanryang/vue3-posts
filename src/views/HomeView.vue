@@ -12,6 +12,8 @@
 		{{ $person.name }}
 	</h2>
 	<button class="btn btn-primary" @click="person.say">click person</button> -->
+	<h2>{{ position }}</h2>
+	<h2>x: {{ x }}, y: {{ y }}</h2>
 </template>
 
 <script>
@@ -25,7 +27,8 @@ export default {
 
 <script setup>
 import { useRouter } from 'vue-router';
-import { ref } from 'vue';
+import { reactive, ref, toRefs } from 'vue';
+
 const router = useRouter();
 const goAboutPage = () => {
 	router.push('/about');
@@ -35,6 +38,15 @@ const items = ref(['사과', '딸기', '바나나', '라임', '레몬']);
 
 // const person = inject('person');
 // console.log('person.name', person.name);
+
+const position = reactive({
+	x: 100,
+	y: 1000,
+});
+// const { x, y } = position;
+// const x = toRef(position, 'x');
+// const y = toRef(position, 'y');
+const { x, y } = toRefs(position);
 </script>
 
 <style lang="scss" scoped></style>
