@@ -55,7 +55,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import useAlert from '@/composables/alert';
+import { useAlert } from '@/composables/alert';
 import { useAxios } from '@/hooks/useAxios';
 import { computed, toRefs } from 'vue';
 import { useNumber } from '@/composables/number';

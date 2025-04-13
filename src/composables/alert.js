@@ -1,17 +1,13 @@
-import { ref } from 'vue';
+import { useAlertStore } from '@/stores/alert';
+import { storeToRefs } from 'pinia';
 
-const alerts = ref([]);
+export const useAlert = () => {
+	const { alerts } = storeToRefs(useAlertStore());
+	const { vAlert, vSuccess } = useAlertStore();
 
-export default function useAlert() {
-	// alert
-	const vAlert = (message, type = 'error') => {
-		alerts.value.push({ message, type });
-		setTimeout(() => {
-			// showAlert.value = false
-			alerts.value.shift();
-		}, 2000);
+	return {
+		alerts,
+		vAlert,
+		vSuccess,
 	};
-	const vSuccess = message => vAlert(message, 'success');
-
-	return { alerts, vAlert, vSuccess };
-}
+};
