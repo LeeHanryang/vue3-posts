@@ -63,12 +63,11 @@ const formatDate = date => {
 	});
 };
 
-const { data: todo, error, loading } = useAxios(`/todos/${route.params.id}`);
-
-console.log('Route params:', route.params);
-console.log('Loading:', loading);
-console.log('Error:', error);
-console.log('Todo data:', todo);
+const {
+	data: todo,
+	error,
+	loading,
+} = useAxios(`/todos/${route.params.id}`, {}, { immediate: true });
 
 const {
 	error: removeError,

@@ -9,6 +9,21 @@
 			</div>
 		</div>
 
+		<div class="row mb-3">
+			<div class="col">
+				<div class="input-group">
+					<input
+						type="text"
+						class="form-control"
+						v-model="searchKeyword"
+						placeholder="검색어를 입력하세요"
+						@keyup.enter="handleSearch"
+					/>
+					<button class="btn btn-primary" @click="handleSearch">검색</button>
+				</div>
+			</div>
+		</div>
+
 		<AppLoading v-if="loading" />
 
 		<AppError v-else-if="error" :message="error.message" />
@@ -61,9 +76,12 @@
 import { useRouter } from 'vue-router';
 import { useAlert } from '@/composables/alert';
 import { useAxios } from '@/hooks/useAxios';
+import { ref } from 'vue';
 
 const router = useRouter();
 const { vAlert, vSuccess } = useAlert();
+
+const searchKeyword = ref('');
 
 const formatDate = date => {
 	if (!date) return '';
@@ -79,7 +97,33 @@ const formatDate = date => {
 	});
 };
 
-const { data: todos, error, loading } = useAxios('/todos');
+const {
+	data: todos,
+	error,
+	loading,
+	execute,
+} = useAxios('/todos', {}, { immediate: true });
+
+const handleSearch = () => {
+	if (searchKeyword.value) {
+		const { execute: searchExecute } = useAxios(
+			'/todos/search',
+			{
+				params: {
+					keyword: searchKeyword.value,
+				},
+			},
+			{
+				onSuccess: response => {
+					todos.value = response.data;
+				},
+			},
+		);
+		searchExecute();
+	} else {
+		execute();
+	}
+};
 
 let toggleLoading = false;
 

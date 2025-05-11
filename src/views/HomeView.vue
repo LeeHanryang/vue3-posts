@@ -19,7 +19,6 @@
 <script>
 export default {
 	created() {
-		// console.log(this.$person.name);
 		// this.$person.say();
 	},
 };
@@ -35,9 +34,6 @@ const goAboutPage = () => {
 };
 
 const items = ref(['사과', '딸기', '바나나', '라임', '레몬']);
-
-// const person = inject('person');
-// console.log('person.name', person.name);
 
 const position = reactive({
 	x: 100,

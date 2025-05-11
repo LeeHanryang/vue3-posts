@@ -6,6 +6,7 @@ import {
 	getCurrentUser,
 	handleSocialLoginCallback,
 } from '@/api/user';
+import axios from 'axios';
 
 export const useAuthStore = defineStore('auth', () => {
 	const user = ref(null);
@@ -14,18 +15,18 @@ export const useAuthStore = defineStore('auth', () => {
 
 	const isAuthenticated = computed(() => !!token.value);
 
-	const loginUser = async credentials => {
+	const loginUser = async (email, password) => {
 		try {
-			loading.value = true;
-			const response = await login(credentials);
-			token.value = response.data.token;
-			localStorage.setItem('token', token.value);
+			const response = await axios.post('/users/login', {
+				email,
+				password,
+			});
+			token.value = response.data.access_token;
+			localStorage.setItem('token', response.data.access_token);
 			await fetchUser();
+			return response;
 		} catch (error) {
-			console.error('Login failed:', error);
 			throw error;
-		} finally {
-			loading.value = false;
 		}
 	};
 

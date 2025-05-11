@@ -63,12 +63,10 @@ const {
 	{
 		immediate: false,
 		onSuccess: response => {
-			console.log('수정 성공 응답:', response);
 			vSuccess('수정이 완료되었습니다.');
 			router.push(`/todos/${id}`);
 		},
 		onError: err => {
-			console.error('수정 실패:', err);
 			vAlert(err.message);
 		},
 	},
@@ -80,7 +78,6 @@ const edit = () => {
 		description: todo.value.description,
 		completed: todo.value.completed,
 	};
-	console.log('수정할 데이터:', updatedData);
 	execute(updatedData);
 };
 
