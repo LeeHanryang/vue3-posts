@@ -70,10 +70,7 @@ const password = ref('');
 
 const handleSubmit = async () => {
 	try {
-		await authStore.loginUser({
-			email: email.value,
-			password: password.value,
-		});
+		await authStore.loginUser(email.value, password.value);
 		router.push('/todos');
 	} catch (error) {
 		console.error('Login failed:', error);
