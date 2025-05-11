@@ -62,10 +62,12 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAlert } from '@/composables/alert';
 import { signup } from '@/api/user';
 import SocialLoginButtons from '@/components/auth/SocialLoginButtons.vue';
 
 const router = useRouter();
+const { vAlert, vSuccess } = useAlert();
 const loading = ref(false);
 
 const form = ref({
@@ -78,10 +80,10 @@ const handleSubmit = async () => {
 	try {
 		loading.value = true;
 		await signup(form.value);
-		alert('회원가입이 완료되었습니다.');
+		vSuccess('회원가입이 완료되었습니다.');
 		router.push('/login');
 	} catch (error) {
-		alert(error.response?.data?.message || '회원가입 중 오류가 발생했습니다.');
+		vAlert(error.response?.data?.message || '회원가입 중 오류가 발생했습니다.');
 	} finally {
 		loading.value = false;
 	}

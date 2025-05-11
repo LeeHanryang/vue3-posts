@@ -1,14 +1,21 @@
 <script setup>
-import TheHeader from '@/layouts/TheHeader.vue';
-import TheView from '@/layouts/TheView.vue';
+import AppHeader from '@/components/AppHeader.vue';
+import AppAlert from '@/components/app/AppAlert.vue';
 </script>
 
 <template>
-	<main>
-		<TheHeader />
-		<TheView />
-		<AppAlert />
+	<AppHeader />
+	<main class="container py-4">
+		<router-view />
 	</main>
+	<AppAlert />
 </template>
 
-<style></style>
+<style>
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+body {
+	background-color: #f8f9fa;
+}
+</style>

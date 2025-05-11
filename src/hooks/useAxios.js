@@ -3,6 +3,20 @@ import { isRef, ref, unref, watchEffect } from 'vue';
 
 axios.defaults.baseURL = import.meta.env.VITE_APP_API_URL;
 
+// 인증 토큰을 헤더에 추가하는 인터셉터
+axios.interceptors.request.use(
+	config => {
+		const token = localStorage.getItem('token');
+		if (token) {
+			config.headers.Authorization = `Bearer ${token}`;
+		}
+		return config;
+	},
+	error => {
+		return Promise.reject(error);
+	},
+);
+
 const defaultConfig = {
 	method: 'get',
 };

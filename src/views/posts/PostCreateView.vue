@@ -1,20 +1,24 @@
 <template>
 	<div>
-		<h2 @click="visibleForm = !visibleForm">게시글 등록</h2>
+		<h2>Todo 작성</h2>
 		<hr class="my-4" />
 
-		<AppLoading v-if="loading" />
-		<AppError v-else-if="error" :message="error.message" />
+		<AppError v-if="error" :message="error.message" />
 
 		<PostForm
-			v-if="visibleForm"
-			v-model:title="post.title"
-			v-model:contents="post.contents"
-			@submit.prevent="handleSave"
+			:title="post.title"
+			:description="post.description"
+			@update:title="post.title = $event"
+			@update:description="post.description = $event"
+			@submit="handleSave"
 		>
 			<template #actions>
-				<button class="btn btn-outline-dark" type="button" @click="handleList">
-					목록
+				<button
+					class="btn btn-outline-danger"
+					type="button"
+					@click="handleList"
+				>
+					취소
 				</button>
 
 				<button class="btn btn-primary" :disabled="loading">
@@ -44,26 +48,24 @@ const { vAlert, vSuccess } = useAlert();
 
 const post = ref({
 	title: '',
-	contents: '',
-	createdAt: Date.now(), // yyyy-mm-dd
+	description: '',
 });
 
 const router = useRouter();
 
 const handleList = () => {
-	router.push('/posts');
+	router.push('/todos');
 };
 
 const { error, loading, execute } = useAxios(
-	'/posts',
+	'/todos',
 	{
 		method: 'post',
-		data: { ...post.value },
 	},
 	{
 		immediate: false,
 		onSuccess: () => {
-			router.push('/posts');
+			router.push('/todos');
 			vSuccess('등록이 완료되었습니다.');
 		},
 		onError: err => {
@@ -72,11 +74,13 @@ const { error, loading, execute } = useAxios(
 	},
 );
 
-const handleSave = async () => {
-	execute({ ...post.value });
+const handleSave = () => {
+	execute({
+		title: post.value.title,
+		description: post.value.description,
+		completed: false,
+	});
 };
-
-const visibleForm = ref(true);
 </script>
 
 <style lang="scss" scoped></style>

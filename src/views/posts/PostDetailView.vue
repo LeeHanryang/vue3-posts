@@ -4,33 +4,20 @@
 	<AppError v-else-if="error" :message="error.message" />
 
 	<div v-else>
-		<h2>{{ post.title }}</h2>
-		<p>id: {{ props.id }}, isOdd: {{ isOdd }}, isEven: {{ isEven }}</p>
-		<p>{{ post.contents }}</p>
-		<p class="text-muted">
-			{{ $dayjs(post.createdAt).format('YYYY.MM.DD HH:mm:ss') }}
-		</p>
+		<h2>{{ todo.title }}</h2>
+		<p>{{ todo.description }}</p>
+		<p class="text-muted">{{ formatDate(todo.createdAt) }}</p>
 		<hr class="my-4" />
 
 		<AppError v-if="removeError" :message="removeError.message" />
 
 		<div class="row g-2">
 			<div class="col-auto">
-				<button class="btn btn-outline-dark">이전글</button>
-			</div>
-			<div class="col-auto">
-				<button class="btn btn-outline-dark">다음글</button>
+				<button class="btn btn-outline-dark" @click="goToList">목록</button>
 			</div>
 			<div class="col-auto me-auto"></div>
 			<div class="col-auto">
-				<button class="btn btn-outline-dark" @click="handlePostList">
-					목록
-				</button>
-			</div>
-			<div class="col-auto">
-				<button class="btn btn-outline-primary" @click="handlePostEdit">
-					수정
-				</button>
+				<button class="btn btn-outline-primary" @click="goToEdit">수정</button>
 			</div>
 			<div class="col-auto">
 				<button
@@ -54,39 +41,48 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useAlert } from '@/composables/alert';
 import { useAxios } from '@/hooks/useAxios';
-import { computed, toRefs } from 'vue';
-import { useNumber } from '@/composables/number';
 
-const props = defineProps({
-	id: [String, Number],
-});
-
+const route = useRoute();
 const router = useRouter();
-const { id: idRef } = toRefs(props);
-// const idRef = toRef(props, 'id');
 const { vSuccess, vAlert } = useAlert();
-const url = computed(() => `/posts/${props.id}`);
-const { data: post, error, loading } = useAxios(url);
 
-const { isOdd, isEven } = useNumber(idRef);
+const formatDate = date => {
+	if (!date) return '';
+	const d = new Date(date);
+	return d.toLocaleDateString('ko-KR', {
+		year: 'numeric',
+		month: '2-digit',
+		day: '2-digit',
+		hour: '2-digit',
+		minute: '2-digit',
+		second: '2-digit',
+		hour12: false,
+	});
+};
+
+const { data: todo, error, loading } = useAxios(`/todos/${route.params.id}`);
+
+console.log('Route params:', route.params);
+console.log('Loading:', loading);
+console.log('Error:', error);
+console.log('Todo data:', todo);
 
 const {
 	error: removeError,
 	loading: removeLoading,
 	execute,
 } = useAxios(
-	`/posts/${props.id}`,
+	`/todos/${route.params.id}`,
 	{
 		method: 'delete',
-		data: { ...post.value },
 	},
 	{
 		immediate: false,
 		onSuccess: () => {
-			router.push('/posts');
+			router.push('/todos');
 			vSuccess('삭제가 완료되었습니다.');
 		},
 		onError: err => {
@@ -100,20 +96,17 @@ const remove = () => {
 	execute();
 };
 
-const handlePostList = () => {
-	router.push({
-		name: 'posts',
-	});
+const goToList = () => {
+	router.push('/todos');
 };
 
-const handlePostEdit = () => {
-	router.push({
-		name: 'posts.edit',
-		params: {
-			id: props.id,
-		},
-	});
+const goToEdit = () => {
+	router.push(`/todos/${route.params.id}/edit`);
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style scoped>
+.btn {
+	font-weight: 500;
+}
+</style>

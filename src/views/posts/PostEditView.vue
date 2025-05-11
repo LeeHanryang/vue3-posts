@@ -4,19 +4,21 @@
 	<AppError v-else-if="error" :message="error.message" />
 
 	<div v-else>
-		<h2>게시글 수정</h2>
+		<h2>Todo 수정</h2>
 		<hr class="my-4" />
 		<AppError v-if="editError" :message="editError.message" />
 		<PostForm
-			v-model:title="post.title"
-			v-model:contents="post.contents"
-			@submit.prevent="edit"
+			:title="todo.title"
+			:description="todo.description"
+			@update:title="todo.title = $event"
+			@update:description="todo.description = $event"
+			@submit="edit"
 		>
 			<template #actions>
 				<button
 					class="btn btn-outline-danger"
 					type="button"
-					@click="handleDetail"
+					@click="goToDetail"
 				>
 					취소
 				</button>
@@ -47,32 +49,43 @@ const router = useRouter();
 const id = route.params.id;
 
 const { vSuccess, vAlert } = useAlert();
-const { data: post, error, loading } = useAxios(`/posts/${id}`);
+const { data: todo, error, loading } = useAxios(`/todos/${id}`);
 
 const {
 	error: editError,
 	loading: editLoading,
 	execute,
 } = useAxios(
-	`/posts/${id}`,
+	`/todos/${id}`,
 	{
-		method: 'patch',
-		data: { ...post.value },
+		method: 'put',
 	},
 	{
 		immediate: false,
-		onSuccess: () => {
-			router.push({ name: 'posts.detail', params: { id } });
+		onSuccess: response => {
+			console.log('수정 성공 응답:', response);
 			vSuccess('수정이 완료되었습니다.');
+			router.push(`/todos/${id}`);
 		},
 		onError: err => {
+			console.error('수정 실패:', err);
 			vAlert(err.message);
 		},
 	},
 );
 
 const edit = () => {
-	execute({ ...post.value });
+	const updatedData = {
+		title: todo.value.title,
+		description: todo.value.description,
+		completed: todo.value.completed,
+	};
+	console.log('수정할 데이터:', updatedData);
+	execute(updatedData);
+};
+
+const goToDetail = () => {
+	router.push(`/todos/${id}`);
 };
 </script>
 

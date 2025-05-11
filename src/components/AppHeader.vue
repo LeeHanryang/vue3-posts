@@ -29,7 +29,11 @@
 				<div class="d-flex align-items-center">
 					<template v-if="authStore.isAuthenticated">
 						<span class="me-3">{{ authStore.user?.username }}님</span>
-						<button class="btn btn-outline-danger" @click="handleLogout">
+						<button
+							class="btn btn-outline-danger"
+							@click="handleLogout"
+							:disabled="authStore.loading"
+						>
 							로그아웃
 						</button>
 					</template>

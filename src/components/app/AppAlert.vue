@@ -25,14 +25,29 @@ import { useAlert } from '@/composables/alert';
 
 const { alerts } = useAlert();
 
-const typeStyle = type => (type === 'error' ? 'alert-danger' : 'alert-primary');
+const typeStyle = type => {
+	switch (type) {
+		case 'error':
+			return 'alert-danger';
+		case 'success':
+			return 'alert-success';
+		default:
+			return 'alert-primary';
+	}
+};
 </script>
 
 <style scoped>
 .app-alert {
 	position: fixed;
-	top: 10px;
+	top: 70px;
 	right: 10px;
+	z-index: 1000;
+}
+
+.alert {
+	min-width: 300px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .slide-enter-from,

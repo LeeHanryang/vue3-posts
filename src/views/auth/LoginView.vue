@@ -1,11 +1,10 @@
 <template>
 	<div class="container">
 		<div class="row justify-content-center">
-			<div class="col-md-6">
-				<div class="card mt-5">
-					<div class="card-body">
+			<div class="col-md-6 col-lg-4">
+				<div class="card shadow-sm">
+					<div class="card-body p-4">
 						<h2 class="text-center mb-4">로그인</h2>
-
 						<form @submit.prevent="handleSubmit">
 							<div class="mb-3">
 								<label for="email" class="form-label">이메일</label>
@@ -13,7 +12,7 @@
 									type="email"
 									class="form-control"
 									id="email"
-									v-model="form.email"
+									v-model="email"
 									required
 								/>
 							</div>
@@ -23,7 +22,7 @@
 									type="password"
 									class="form-control"
 									id="password"
-									v-model="form.password"
+									v-model="password"
 									required
 								/>
 							</div>
@@ -37,11 +36,13 @@
 								</button>
 							</div>
 						</form>
+
+						<SocialLoginButtons />
+
 						<div class="text-center mt-3">
-							<router-link to="/signup"
-								>계정이 없으신가요? 회원가입</router-link
-							>
-							<SocialLoginButtons />
+							<router-link to="/signup" class="text-decoration-none">
+								계정이 없으신가요? 회원가입
+							</router-link>
 						</div>
 					</div>
 				</div>
@@ -54,40 +55,53 @@
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import { handleSocialLoginCallback } from '@/api/user';
 import SocialLoginButtons from '@/components/auth/SocialLoginButtons.vue';
 
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 
-const form = ref({
-	email: '',
-	password: '',
-});
+const email = ref('');
+const password = ref('');
 
 const handleSubmit = async () => {
 	try {
-		await authStore.loginUser(form.value);
-		router.push('/');
+		await authStore.loginUser({
+			email: email.value,
+			password: password.value,
+		});
+		router.push('/todos');
 	} catch (error) {
-		alert(error.response?.data?.message || '로그인 중 오류가 발생했습니다.');
+		console.error('Login failed:', error);
 	}
 };
 
-// 소셜 로그인 콜백 처리
 onMounted(async () => {
+	// 소셜 로그인 콜백 처리
 	const { provider, code } = route.query;
 	if (provider && code) {
 		try {
-			const response = await handleSocialLoginCallback(provider, code);
-			authStore.setToken(response.data.token);
-			await authStore.fetchUser();
-			router.push('/');
+			await authStore.handleSocialLogin(provider, code);
+			router.push('/todos');
 		} catch (error) {
-			alert('소셜 로그인 중 오류가 발생했습니다.');
-			router.push('/login');
+			console.error('Social login failed:', error);
 		}
 	}
 });
 </script>
+
+<style scoped>
+.card {
+	border: none;
+	border-radius: 10px;
+}
+
+.form-control:focus {
+	box-shadow: none;
+	border-color: #0d6efd;
+}
+
+.btn-primary {
+	padding: 0.6rem;
+}
+</style>

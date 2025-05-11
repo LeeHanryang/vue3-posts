@@ -8,28 +8,22 @@ import {
 } from '@/api/user';
 
 export const useAuthStore = defineStore('auth', () => {
-	const token = ref(localStorage.getItem('token') || '');
 	const user = ref(null);
+	const token = ref(localStorage.getItem('token'));
 	const loading = ref(false);
 
 	const isAuthenticated = computed(() => !!token.value);
-
-	const setToken = newToken => {
-		token.value = newToken;
-		if (newToken) {
-			localStorage.setItem('token', newToken);
-		} else {
-			localStorage.removeItem('token');
-		}
-	};
 
 	const loginUser = async credentials => {
 		try {
 			loading.value = true;
 			const response = await login(credentials);
-			setToken(response.data.token);
+			token.value = response.data.token;
+			localStorage.setItem('token', token.value);
 			await fetchUser();
-			return response;
+		} catch (error) {
+			console.error('Login failed:', error);
+			throw error;
 		} finally {
 			loading.value = false;
 		}
@@ -37,21 +31,30 @@ export const useAuthStore = defineStore('auth', () => {
 
 	const logoutUser = async () => {
 		try {
+			loading.value = true;
 			await logout();
+		} catch (error) {
+			console.error('Logout failed:', error);
 		} finally {
-			setToken('');
+			token.value = null;
 			user.value = null;
+			localStorage.removeItem('token');
+			loading.value = false;
 		}
 	};
 
 	const fetchUser = async () => {
 		try {
+			loading.value = true;
 			const response = await getCurrentUser();
 			user.value = response.data;
 		} catch (error) {
-			setToken('');
+			console.error('Failed to fetch user:', error);
+			token.value = null;
 			user.value = null;
-			throw error;
+			localStorage.removeItem('token');
+		} finally {
+			loading.value = false;
 		}
 	};
 
@@ -59,7 +62,8 @@ export const useAuthStore = defineStore('auth', () => {
 		try {
 			loading.value = true;
 			const response = await handleSocialLoginCallback(provider, code);
-			setToken(response.data.token);
+			token.value = response.data.token;
+			localStorage.setItem('token', token.value);
 			await fetchUser();
 			return response;
 		} finally {
@@ -68,8 +72,8 @@ export const useAuthStore = defineStore('auth', () => {
 	};
 
 	return {
-		token,
 		user,
+		token,
 		loading,
 		isAuthenticated,
 		loginUser,
