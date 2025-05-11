@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<h2>게시글 목록</h2>
+		<h2>Todo List</h2>
 		<hr class="my-4" />
 
 		<PostFilter
@@ -15,18 +15,46 @@
 		<AppError v-else-if="error" :message="error.message" />
 
 		<template v-else>
-			<AppGrid :items="posts" cols="col-4">
-				<template v-slot="{ item }">
-					<PostItem
-						:title="item.title"
-						:contents="item.contents"
-						:createdAt="item.createdAt"
-						@click="handlePostDetail(item.id)"
-						@modal="openModal(item)"
-						@preview="selectPreview(item.id)"
-					/>
-				</template>
-			</AppGrid>
+			<div class="table-responsive">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+							<th scope="col" class="text-center" style="width: 80px">순번</th>
+							<th scope="col" style="width: 200px">제목</th>
+							<th scope="col">내용</th>
+							<th scope="col" class="text-center" style="width: 150px">
+								생성일
+							</th>
+							<th scope="col" class="text-center" style="width: 100px">완료</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr
+							v-for="(todo, index) in todos"
+							:key="todo.id"
+							@dblclick="handleTodoDetail(todo.id)"
+							class="cursor-pointer"
+						>
+							<td class="text-center">
+								{{ (params._page - 1) * params._limit + index + 1 }}
+							</td>
+							<td>{{ todo.title }}</td>
+							<td class="text-truncate" style="max-width: 300px">
+								{{ todo.contents }}
+							</td>
+							<td class="text-center">{{ formatDate(todo.createdAt) }}</td>
+							<td class="text-center">
+								<input
+									type="checkbox"
+									class="form-check-input"
+									v-model="todo.completed"
+									@click.stop="handleToggleComplete(todo)"
+								/>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 
 			<AppPagination
 				:currentPage="params._page"
@@ -34,78 +62,69 @@
 				@page="page => (params._page = page)"
 			/>
 		</template>
-
-		<Teleport to="#modal">
-			<PostModal
-				v-model="show"
-				:title="modalTitle"
-				:contents="modalContents"
-				:createdAt="modalCreateAt"
-			/>
-		</Teleport>
-
-		<template v-if="previewId">
-			<hr class="my-5" />
-			<AppCard>
-				<PostDetail :id="previewId" />
-			</AppCard>
-		</template>
 	</div>
 </template>
 
 <script setup>
-import PostItem from '@/components/posts/PostItem.vue';
-import PostDetail from '@/views/posts/PostDetailView.vue';
 import PostFilter from '@/components/posts/PostFilter.vue';
-import PostModal from '@/components/posts/PostModal.vue';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAxios } from '@/hooks/useAxios';
+import dayjs from 'dayjs';
+import { updateTodo } from '@/api/todo';
 
 const router = useRouter();
-
-const previewId = ref(null);
-const selectPreview = id => (previewId.value = id);
 
 // 페이징
 const params = ref({
 	_sort: 'createdAt',
 	_order: 'desc',
 	_page: 1,
-	_limit: 3,
+	_limit: 10,
 	title_like: '',
 });
 
 const {
 	response,
-	data: posts,
+	data: todos,
 	error,
 	loading,
-} = useAxios('/posts', { method: 'get', params });
+} = useAxios('/todos', { method: 'get', params });
 const totalCount = computed(() => response.value.headers['x-total-count']);
 const totalPages = computed(() =>
 	Math.ceil(totalCount.value / params.value._limit),
 );
 
-const handlePostDetail = id => {
+const handleTodoDetail = id => {
 	router.push({
 		name: 'posts.detail',
 		params: { id },
 	});
 };
 
-//modal
-const show = ref(false);
-const modalTitle = ref('');
-const modalContents = ref('');
-const modalCreateAt = ref('');
+const handleToggleComplete = async todo => {
+	try {
+		await updateTodo(todo.id, {
+			...todo,
+			completed: !todo.completed,
+		});
+	} catch (err) {
+		console.error('Failed to update todo:', err);
+	}
+};
 
-const openModal = ({ title, contents, createdAt }) => {
-	show.value = true;
-	modalTitle.value = title;
-	modalContents.value = contents;
-	modalCreateAt.value = createdAt;
+const formatDate = date => {
+	return dayjs(date).format('YYYY-MM-DD');
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style scoped>
+.cursor-pointer {
+	cursor: pointer;
+}
+.text-truncate {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+</style>

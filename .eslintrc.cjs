@@ -25,8 +25,10 @@ module.exports = {
 				printWidth: 80,
 				bracketSpacing: true,
 				arrowParens: 'avoid',
-				endOfLine: 'auto', // 한줄 추가
+				endOfLine: 'auto',
 			},
 		],
+		'arrow-parens': ['error', 'as-needed'],
+		'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
 	},
 };

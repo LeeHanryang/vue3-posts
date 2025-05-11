@@ -5,6 +5,7 @@ function createInstance(baseURL, options = {}) {
 	return instance;
 }
 
-export const posts = createInstance(import.meta.env.VITE_APP_API_URL + 'posts');
-// development : http://localhost:5000/posts/
-// production : http://localhost:5001/posts/
+const baseURL = 'http://localhost:8080';
+
+export const todos = createInstance(baseURL + '/todos');
+export const users = createInstance(baseURL + '/users');
