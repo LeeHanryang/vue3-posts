@@ -1,130 +1,124 @@
 <template>
-	<div>
-		<h2>Todo List</h2>
-		<hr class="my-4" />
+	<div class="container mt-4">
+		<div class="d-flex justify-content-between align-items-center mb-4">
+			<h2>Todo List</h2>
+			<router-link to="/todos/create" class="btn btn-primary">
+				<i class="bi bi-plus-lg"></i> Todo 작성
+			</router-link>
+		</div>
 
-		<PostFilter
-			v-model:title="params.title_like"
-			v-model:limit="params._limit"
-		/>
-
-		<hr class="my-4" />
-
-		<AppLoading v-if="loading" />
-
-		<AppError v-else-if="error" :message="error.message" />
-
-		<template v-else>
-			<div class="table-responsive">
-				<table class="table table-hover">
-					<thead>
-						<tr>
-							<th scope="col" class="text-center" style="width: 80px">순번</th>
-							<th scope="col" style="width: 200px">제목</th>
-							<th scope="col">내용</th>
-							<th scope="col" class="text-center" style="width: 150px">
-								생성일
-							</th>
-							<th scope="col" class="text-center" style="width: 100px">완료</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr
-							v-for="(todo, index) in todos"
-							:key="todo.id"
-							@dblclick="handleTodoDetail(todo.id)"
-							class="cursor-pointer"
-						>
-							<td class="text-center">
-								{{ (params._page - 1) * params._limit + index + 1 }}
-							</td>
-							<td>{{ todo.title }}</td>
-							<td class="text-truncate" style="max-width: 300px">
-								{{ todo.contents }}
-							</td>
-							<td class="text-center">{{ formatDate(todo.createdAt) }}</td>
-							<td class="text-center">
-								<input
-									type="checkbox"
-									class="form-check-input"
-									v-model="todo.completed"
-									@click.stop="handleToggleComplete(todo)"
-								/>
-							</td>
-						</tr>
-					</tbody>
-				</table>
+		<div class="card">
+			<div class="card-body">
+				<div class="table-responsive">
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th style="width: 60px">#</th>
+								<th style="width: 80px">상태</th>
+								<th>제목</th>
+								<th style="width: 180px">작성일</th>
+								<th style="width: 100px">작성자</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr
+								v-for="(todo, index) in todos"
+								:key="todo.id"
+								@dblclick="viewTodoDetail(todo.id)"
+								style="cursor: pointer"
+							>
+								<td>{{ index + 1 }}</td>
+								<td>
+									<div class="form-check">
+										<input
+											class="form-check-input"
+											type="checkbox"
+											:checked="todo.completed"
+											@click.stop="toggleComplete(todo)"
+										/>
+									</div>
+								</td>
+								<td>
+									<span
+										:class="{
+											'text-decoration-line-through': todo.completed,
+										}"
+									>
+										{{ todo.title }}
+									</span>
+								</td>
+								<td>{{ formatDate(todo.createdAt) }}</td>
+								<td>{{ todo.username }}</td>
+							</tr>
+							<tr v-if="todos.length === 0">
+								<td colspan="5" class="text-center py-4">
+									등록된 Todo가 없습니다.
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 			</div>
-
-			<AppPagination
-				:currentPage="params._page"
-				:totalPages="totalPages"
-				@page="page => (params._page = page)"
-			/>
-		</template>
+		</div>
 	</div>
 </template>
 
 <script setup>
-import PostFilter from '@/components/posts/PostFilter.vue';
-import { computed, ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAxios } from '@/hooks/useAxios';
-import dayjs from 'dayjs';
-import { updateTodo } from '@/api/todo';
+import { getTodos, toggleTodoComplete } from '@/api/todo';
 
 const router = useRouter();
+const todos = ref([]);
 
-// 페이징
-const params = ref({
-	_sort: 'createdAt',
-	_order: 'desc',
-	_page: 1,
-	_limit: 10,
-	title_like: '',
-});
-
-const {
-	response,
-	data: todos,
-	error,
-	loading,
-} = useAxios('/todos', { method: 'get', params });
-const totalCount = computed(() => response.value.headers['x-total-count']);
-const totalPages = computed(() =>
-	Math.ceil(totalCount.value / params.value._limit),
-);
-
-const handleTodoDetail = id => {
-	router.push({
-		name: 'posts.detail',
-		params: { id },
+const formatDate = date => {
+	if (!date) return '';
+	const d = new Date(date);
+	return d.toLocaleDateString('ko-KR', {
+		year: 'numeric',
+		month: '2-digit',
+		day: '2-digit',
 	});
 };
 
-const handleToggleComplete = async todo => {
+const fetchTodos = async () => {
 	try {
-		await updateTodo(todo.id, {
-			...todo,
-			completed: !todo.completed,
-		});
-	} catch (err) {
-		console.error('Failed to update todo:', err);
+		const response = await getTodos();
+		todos.value = response.data;
+	} catch (error) {
+		console.error('Failed to fetch todos:', error);
 	}
 };
 
-const formatDate = date => {
-	return dayjs(date).format('YYYY-MM-DD');
+const toggleComplete = async todo => {
+	try {
+		await toggleTodoComplete(todo.id);
+		todo.completed = !todo.completed;
+	} catch (error) {
+		console.error('Failed to toggle todo:', error);
+	}
 };
+
+const viewTodoDetail = id => {
+	router.push(`/todos/${id}`);
+};
+
+onMounted(() => {
+	fetchTodos();
+});
 </script>
 
 <style scoped>
-.cursor-pointer {
+.table th {
+	background-color: #f8f9fa;
+}
+
+.form-check-input {
 	cursor: pointer;
 }
-.text-truncate {
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+
+.form-check-input:checked {
+	background-color: #198754;
+	border-color: #198754;
 }
 </style>
