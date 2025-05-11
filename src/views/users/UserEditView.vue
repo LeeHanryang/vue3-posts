@@ -1,18 +1,18 @@
 <template>
 	<div>
-		<h2>사용자 수정</h2>
+		<h2>내 정보 수정</h2>
 		<hr class="my-4" />
 
 		<AppError v-if="error" :message="error.message" />
 
 		<form v-if="user" @submit.prevent="handleSave">
 			<div class="mb-3">
-				<label for="name" class="form-label">이름</label>
+				<label for="username" class="form-label">사용자명</label>
 				<input
 					type="text"
 					class="form-control"
-					id="name"
-					v-model="user.name"
+					id="username"
+					v-model="user.username"
 					required
 				/>
 			</div>
@@ -24,6 +24,26 @@
 					id="email"
 					v-model="user.email"
 					required
+				/>
+			</div>
+			<div class="mb-3">
+				<label for="created_at" class="form-label">생성일</label>
+				<input
+					type="text"
+					class="form-control"
+					id="created_at"
+					:value="formatDate(user.createdAt)"
+					disabled
+				/>
+			</div>
+			<div class="mb-3">
+				<label for="updated_at" class="form-label">수정일</label>
+				<input
+					type="text"
+					class="form-control"
+					id="updated_at"
+					:value="formatDate(user.updatedAt)"
+					disabled
 				/>
 			</div>
 			<div class="mb-3">
@@ -55,17 +75,33 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAxios } from '@/hooks/useAxios';
 import { useAlert } from '@/composables/alert';
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
 const { vAlert, vSuccess } = useAlert();
+const authStore = useAuthStore();
 const user = ref(null);
+
+const formatDate = dateString => {
+	if (!dateString) return '';
+	const date = new Date(dateString);
+	return date.toLocaleString('ko-KR', {
+		year: 'numeric',
+		month: '2-digit',
+		day: '2-digit',
+		hour: '2-digit',
+		minute: '2-digit',
+		second: '2-digit',
+		hour12: false,
+	});
+};
 
 const {
 	error,
 	loading,
 	execute: fetchUser,
 } = useAxios(
-	`/users/${router.currentRoute.value.params.id}`,
+	'/users/me',
 	{
 		method: 'get',
 	},
@@ -78,14 +114,20 @@ const {
 );
 
 const { execute: updateUser } = useAxios(
-	`/users/${router.currentRoute.value.params.id}`,
+	'/users/me',
 	{
 		method: 'put',
 	},
 	{
 		immediate: false,
 		onSuccess: () => {
-			router.push(`/users/${user.value.id}`);
+			// auth store의 사용자 정보 업데이트
+			authStore.user = {
+				...authStore.user,
+				username: user.value.username,
+				email: user.value.email,
+			};
+			router.push('/users/me');
 			vSuccess('수정이 완료되었습니다.');
 		},
 		onError: err => {
@@ -96,13 +138,13 @@ const { execute: updateUser } = useAxios(
 
 const handleSave = () => {
 	updateUser({
-		name: user.value.name,
+		username: user.value.username,
 		email: user.value.email,
 	});
 };
 
 const handleCancel = () => {
-	router.push(`/users/${user.value.id}`);
+	router.push('/users/me');
 };
 </script>
 

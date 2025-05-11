@@ -20,9 +20,7 @@
 							<router-link class="nav-link" to="/todos">Todo 목록</router-link>
 						</li>
 						<li class="nav-item">
-							<router-link class="nav-link" to="/todos/create"
-								>Todo 작성</router-link
-							>
+							<router-link class="nav-link" to="/users/me">내 정보</router-link>
 						</li>
 					</template>
 				</ul>

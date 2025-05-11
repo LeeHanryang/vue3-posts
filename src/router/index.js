@@ -62,24 +62,21 @@ const routes = [
 		meta: { requiresAuth: true },
 	},
 	{
-		path: '/users/:id',
+		path: '/users/me',
 		name: 'users.detail',
 		component: UserDetailView,
-		props: true,
 		meta: { requiresAuth: true },
 	},
 	{
-		path: '/users/:id/edit',
+		path: '/users/me/edit',
 		name: 'users.edit',
 		component: UserEditView,
-		props: route => ({ id: Number(route.params.id) }),
 		meta: { requiresAuth: true },
 	},
 	{
-		path: '/users/:id/delete',
+		path: '/users/me/delete',
 		name: 'users.delete',
 		component: UserDeleteView,
-		props: route => ({ id: Number(route.params.id) }),
 		meta: { requiresAuth: true },
 	},
 	{

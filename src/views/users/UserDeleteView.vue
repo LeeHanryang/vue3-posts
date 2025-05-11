@@ -1,14 +1,14 @@
 <template>
 	<div>
-		<h2>사용자 삭제</h2>
+		<h2>계정 탈퇴</h2>
 		<hr class="my-4" />
 
 		<AppError v-if="error" :message="error.message" />
 
 		<div v-if="user" class="card">
 			<div class="card-body">
-				<h5 class="card-title">정말로 삭제하시겠습니까?</h5>
-				<p class="card-text">이름: {{ user.name }}</p>
+				<h5 class="card-title">정말로 탈퇴하시겠습니까?</h5>
+				<p class="card-text">사용자명: {{ user.username }}</p>
 				<p class="card-text">이메일: {{ user.email }}</p>
 			</div>
 			<div class="card-footer">
@@ -25,7 +25,7 @@
 						></span>
 						<span class="visually-hidden">Loading...</span>
 					</template>
-					<template v-else>삭제</template>
+					<template v-else>탈퇴</template>
 				</button>
 				<button class="btn btn-secondary" @click="handleCancel">취소</button>
 			</div>
@@ -38,9 +38,11 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAxios } from '@/hooks/useAxios';
 import { useAlert } from '@/composables/alert';
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
 const { vAlert, vSuccess } = useAlert();
+const authStore = useAuthStore();
 const user = ref(null);
 
 const {
@@ -48,7 +50,7 @@ const {
 	loading,
 	execute: fetchUser,
 } = useAxios(
-	`/users/${router.currentRoute.value.params.id}`,
+	'/users/me',
 	{
 		method: 'get',
 	},
@@ -61,15 +63,17 @@ const {
 );
 
 const { execute: deleteUser } = useAxios(
-	`/users/${router.currentRoute.value.params.id}`,
+	'/users/me',
 	{
 		method: 'delete',
 	},
 	{
 		immediate: false,
-		onSuccess: () => {
-			router.push('/users');
-			vSuccess('삭제가 완료되었습니다.');
+		onSuccess: async () => {
+			// 로그아웃 처리
+			await authStore.logoutUser();
+			vSuccess('탈퇴가 완료되었습니다.');
+			router.push('/login');
 		},
 		onError: err => {
 			vAlert(err.message);
@@ -82,7 +86,7 @@ const handleDelete = () => {
 };
 
 const handleCancel = () => {
-	router.push(`/users/${user.value.id}`);
+	router.push('/users/me');
 };
 </script>
 

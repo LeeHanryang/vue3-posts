@@ -40,8 +40,8 @@ const typeStyle = type => {
 <style scoped>
 .app-alert {
 	position: fixed;
-	top: 70px;
-	right: 10px;
+	bottom: 20px;
+	right: 20px;
 	z-index: 1000;
 }
 
@@ -53,12 +53,12 @@ const typeStyle = type => {
 .slide-enter-from,
 .slide-leave-to {
 	opacity: 0;
-	transform: translateY(-30px);
+	transform: translateY(30px);
 }
 
 .slide-enter-active,
 .slide-leave-active {
-	transition: all 0.5s ease;
+	transition: all 0.3s ease;
 }
 
 .slide-enter-to,
