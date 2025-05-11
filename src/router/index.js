@@ -6,6 +6,10 @@ import PostEditView from '@/views/posts/PostEditView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
 import SignupView from '@/views/auth/SignupView.vue';
 import LoginView from '@/views/auth/LoginView.vue';
+import OAuthCallbackView from '@/views/auth/OAuthCallbackView.vue';
+import UserDetailView from '@/views/users/UserDetailView.vue';
+import UserEditView from '@/views/users/UserEditView.vue';
+import UserDeleteView from '@/views/users/UserDeleteView.vue';
 import { useAuthStore } from '@/stores/auth';
 
 const routes = [
@@ -17,6 +21,12 @@ const routes = [
 		path: '/login',
 		name: 'login',
 		component: LoginView,
+		meta: { requiresAuth: false },
+	},
+	{
+		path: '/login/oauth2/code/:provider',
+		name: 'oauth-callback',
+		component: OAuthCallbackView,
 		meta: { requiresAuth: false },
 	},
 	{
@@ -48,6 +58,27 @@ const routes = [
 		path: '/todos/:id/edit',
 		name: 'todos.edit',
 		component: PostEditView,
+		props: route => ({ id: Number(route.params.id) }),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/users/:id',
+		name: 'users.detail',
+		component: UserDetailView,
+		props: true,
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/users/:id/edit',
+		name: 'users.edit',
+		component: UserEditView,
+		props: route => ({ id: Number(route.params.id) }),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/users/:id/delete',
+		name: 'users.delete',
+		component: UserDeleteView,
 		props: route => ({ id: Number(route.params.id) }),
 		meta: { requiresAuth: true },
 	},

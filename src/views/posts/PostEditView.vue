@@ -16,7 +16,7 @@
 		>
 			<template #actions>
 				<button
-					class="btn btn-outline-danger"
+					class="btn btn-outline-danger me-2"
 					type="button"
 					@click="goToDetail"
 				>

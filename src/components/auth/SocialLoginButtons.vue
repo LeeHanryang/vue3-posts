@@ -13,7 +13,7 @@
 					alt="Google"
 					class="social-icon"
 				/>
-				Google로 계속하기
+				Google로 시작하기
 			</a>
 			<a
 				href="http://localhost:8080/oauth2/authorization/naver"
@@ -24,18 +24,18 @@
 					alt="Naver"
 					class="social-icon"
 				/>
-				Naver로 계속하기
+				Naver로 시작하기
 			</a>
 			<a
 				href="http://localhost:8080/oauth2/authorization/kakao"
 				class="btn btn-kakao"
 			>
 				<img
-					src="https://www.kakaocorp.com/favicon.ico"
+					src="https://developers.kakao.com/assets/img/about/logos/kakaotalksharing/kakaotalk_sharing_btn_medium.png"
 					alt="Kakao"
 					class="social-icon"
 				/>
-				Kakao로 계속하기
+				Kakao로 시작하기
 			</a>
 		</div>
 	</div>

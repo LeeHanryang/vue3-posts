@@ -13,6 +13,7 @@
 									class="form-control"
 									id="email"
 									v-model="email"
+									autocomplete="email"
 									required
 								/>
 							</div>
@@ -23,6 +24,7 @@
 									class="form-control"
 									id="password"
 									v-model="password"
+									autocomplete="current-password"
 									required
 								/>
 							</div>
@@ -55,11 +57,13 @@
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { useAlert } from '@/composables/alert';
 import SocialLoginButtons from '@/components/auth/SocialLoginButtons.vue';
 
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
+const { vAlert } = useAlert();
 
 const email = ref('');
 const password = ref('');
@@ -73,6 +77,7 @@ const handleSubmit = async () => {
 		router.push('/todos');
 	} catch (error) {
 		console.error('Login failed:', error);
+		vAlert(error.response?.data?.message || '로그인에 실패했습니다.');
 	}
 };
 
@@ -85,6 +90,7 @@ onMounted(async () => {
 			router.push('/todos');
 		} catch (error) {
 			console.error('Social login failed:', error);
+			vAlert(error.response?.data?.message || '소셜 로그인에 실패했습니다.');
 		}
 	}
 });

@@ -13,6 +13,7 @@
 									class="form-control"
 									id="username"
 									v-model="form.username"
+									autocomplete="username"
 									required
 								/>
 							</div>
@@ -23,6 +24,7 @@
 									class="form-control"
 									id="email"
 									v-model="form.email"
+									autocomplete="email"
 									required
 								/>
 							</div>
@@ -33,6 +35,20 @@
 									class="form-control"
 									id="password"
 									v-model="form.password"
+									autocomplete="new-password"
+									required
+								/>
+							</div>
+							<div class="mb-3">
+								<label for="passwordConfirm" class="form-label"
+									>비밀번호 확인</label
+								>
+								<input
+									type="password"
+									class="form-control"
+									id="passwordConfirm"
+									v-model="form.passwordConfirm"
+									autocomplete="new-password"
 									required
 								/>
 							</div>
@@ -74,10 +90,17 @@ const form = ref({
 	username: '',
 	email: '',
 	password: '',
+	passwordConfirm: '',
 });
 
 const handleSubmit = async () => {
 	try {
+		// 비밀번호 검증
+		if (form.value.password !== form.value.passwordConfirm) {
+			vAlert('비밀번호가 일치하지 않습니다.');
+			return;
+		}
+
 		loading.value = true;
 		await signup(form.value);
 		vSuccess('회원가입이 완료되었습니다.');

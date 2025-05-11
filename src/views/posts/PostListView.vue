@@ -5,7 +5,7 @@
 				<h2>Todo List</h2>
 			</div>
 			<div class="col text-end">
-				<button class="btn btn-primary" @click="goToCreate">새 Todo</button>
+				<button class="btn btn-primary" @click="goToCreate">+Todo</button>
 			</div>
 		</div>
 

@@ -12,7 +12,7 @@ export const login = credentials => {
 
 // 로그아웃
 export const logout = () => {
-	return axios.post('/users/logout');
+	return axios.post('/logout');
 };
 
 // 현재 사용자 정보 조회
