@@ -40,20 +40,22 @@ const typeStyle = type => {
 <style scoped>
 .app-alert {
 	position: fixed;
-	bottom: 20px;
-	right: 20px;
+	top: 20px;
+	left: 50%;
+	transform: translateX(-50%);
 	z-index: 1000;
 }
 
 .alert {
 	min-width: 300px;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	transform: translateY(0);
 }
 
 .slide-enter-from,
 .slide-leave-to {
 	opacity: 0;
-	transform: translateY(30px);
+	transform: translateY(-100%);
 }
 
 .slide-enter-active,
@@ -64,6 +66,11 @@ const typeStyle = type => {
 .slide-enter-to,
 .slide-leave-from {
 	opacity: 1;
-	transform: translateY(0px);
+	transform: translateY(0);
+}
+
+/* 알림이 여러 개일 때의 간격 */
+.alert + .alert {
+	margin-top: 10px;
 }
 </style>
