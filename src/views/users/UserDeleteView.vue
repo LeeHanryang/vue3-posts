@@ -36,53 +36,42 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAxios } from '@/hooks/useAxios';
 import { useAlert } from '@/composables/alert';
 import { useAuthStore } from '@/stores/auth';
+import { getCurrentUser, deleteCurrentUser } from '@/api/user';
 
 const router = useRouter();
 const { vAlert, vSuccess } = useAlert();
 const authStore = useAuthStore();
 const user = ref(null);
+const loading = ref(false);
 
-const {
-	error,
-	loading,
-	execute: fetchUser,
-} = useAxios(
-	'/users/me',
-	{
-		method: 'get',
-	},
-	{
-		immediate: true,
-		onSuccess: response => {
-			user.value = response.data;
-		},
-	},
-);
+const fetchUser = async () => {
+	try {
+		const response = await getCurrentUser();
+		user.value = response.data;
+	} catch (err) {
+		vAlert(
+			err.response?.data?.message || '사용자 정보를 불러오는데 실패했습니다.',
+		);
+	}
+};
 
-const { execute: deleteUser } = useAxios(
-	'/users/me',
-	{
-		method: 'delete',
-	},
-	{
-		immediate: false,
-		onSuccess: async () => {
-			// 로그아웃 처리
-			await authStore.logoutUser();
-			vSuccess('탈퇴가 완료되었습니다.');
-			router.push('/login');
-		},
-		onError: err => {
-			vAlert(err.message);
-		},
-	},
-);
+fetchUser();
 
-const handleDelete = () => {
-	deleteUser();
+const handleDelete = async () => {
+	try {
+		loading.value = true;
+		await deleteCurrentUser();
+		// 로그아웃 처리
+		await authStore.logoutUser();
+		vSuccess('탈퇴가 완료되었습니다.');
+		router.push('/login');
+	} catch (err) {
+		vAlert(err.response?.data?.message || '탈퇴 중 오류가 발생했습니다.');
+	} finally {
+		loading.value = false;
+	}
 };
 
 const handleCancel = () => {

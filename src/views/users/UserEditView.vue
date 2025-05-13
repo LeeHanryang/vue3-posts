@@ -3,7 +3,7 @@
 		<h2>내 정보 수정</h2>
 		<hr class="my-4" />
 
-		<AppError v-if="error" :message="error.message" />
+		<AppError v-if="error" :message="error.response.data.message" />
 
 		<form v-if="user" @submit.prevent="handleSave">
 			<div class="mb-3">
@@ -76,6 +76,7 @@ import { useRouter } from 'vue-router';
 import { useAxios } from '@/hooks/useAxios';
 import { useAlert } from '@/composables/alert';
 import { useAuthStore } from '@/stores/auth';
+import { updateCurrentUser } from '@/api/user';
 
 const router = useRouter();
 const { vAlert, vSuccess } = useAlert();
@@ -109,35 +110,26 @@ const { error, loading } = useAxios(
 	},
 );
 
-const { execute: updateUser } = useAxios(
-	'/users/me',
-	{
-		method: 'put',
-	},
-	{
-		immediate: false,
-		onSuccess: () => {
-			// auth store의 사용자 정보 업데이트
-			authStore.user = {
-				...authStore.user,
-				username: user.value.username,
-				email: user.value.email,
-			};
-			router.push('/users/me');
-			vSuccess('수정이 완료되었습니다.');
-		},
-		onError: err => {
-			const errorMessage = err.response?.data?.message || err.message;
-			vAlert(errorMessage);
-		},
-	},
-);
+const handleSave = async () => {
+	try {
+		await updateCurrentUser({
+			username: user.value.username,
+			email: user.value.email,
+		});
 
-const handleSave = () => {
-	updateUser({
-		username: user.value.username,
-		email: user.value.email,
-	});
+		// auth store의 사용자 정보 업데이트
+		authStore.user = {
+			...authStore.user,
+			username: user.value.username,
+			email: user.value.email,
+		};
+		router.push('/users/me');
+		vSuccess('수정이 완료되었습니다.');
+	} catch (err) {
+		vAlert(
+			err.response?.data?.message || '회원정보 수정 중 오류가 발생했습니다.',
+		);
+	}
 };
 
 const handleCancel = () => {

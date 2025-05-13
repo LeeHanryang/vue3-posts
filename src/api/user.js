@@ -20,6 +20,16 @@ export const getCurrentUser = () => {
 	return axios.get('/users/me');
 };
 
+// 현재 사용자 정보 수정
+export const updateCurrentUser = userData => {
+	return axios.put('/users/me', userData);
+};
+
+// 현재 사용자 삭제
+export const deleteCurrentUser = () => {
+	return axios.delete('/users/me');
+};
+
 // 소셜 로그인 URL 요청
 export const getSocialLoginUrl = provider => {
 	return axios.get(`/oauth2/authorization/${provider}`);

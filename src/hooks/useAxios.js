@@ -50,7 +50,8 @@ export const useAxios = (url, config = {}, options = {}) => {
 				if (onSuccess) onSuccess(res);
 			})
 			.catch(err => {
-				error.value = err;
+				// error.value = err;
+				error.value = err.response.data;
 				if (onError) onError(err);
 			})
 			.finally(() => {
