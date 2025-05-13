@@ -79,6 +79,12 @@ const handleSubmit = async () => {
 };
 
 onMounted(async () => {
+	// 소셜 로그인 취소 처리
+	if (route.query.error) {
+		vAlert('소셜 로그인이 취소되었습니다.');
+		return;
+	}
+
 	// 소셜 로그인 콜백 처리
 	const { provider, code } = route.query;
 	if (provider && code) {

@@ -7,10 +7,18 @@
 		<p class="text-muted">{{ createdDate }}</p>
 		<template #footer>
 			<div class="d-flex flex-row-reverse">
-				<button class="btn p-1" @click.stop="$emit('modal')">
+				<button
+					class="btn p-1"
+					@click.stop="$emit('modal')"
+					aria-label="모달 보기"
+				>
 					<i class="bi bi-emoji-sunglasses"></i>
 				</button>
-				<button class="btn p-1" @click.stop="$emit('preview')">
+				<button
+					class="btn p-1"
+					@click.stop="$emit('preview')"
+					aria-label="미리보기"
+				>
 					<i class="bi bi-ticket-detailed"></i>
 				</button>
 			</div>

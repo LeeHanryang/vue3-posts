@@ -96,11 +96,7 @@ const formatDate = dateString => {
 	});
 };
 
-const {
-	error,
-	loading,
-	execute: fetchUser,
-} = useAxios(
+const { error, loading } = useAxios(
 	'/users/me',
 	{
 		method: 'get',
@@ -131,7 +127,8 @@ const { execute: updateUser } = useAxios(
 			vSuccess('수정이 완료되었습니다.');
 		},
 		onError: err => {
-			vAlert(err.message);
+			const errorMessage = err.response?.data?.message || err.message;
+			vAlert(errorMessage);
 		},
 	},
 );

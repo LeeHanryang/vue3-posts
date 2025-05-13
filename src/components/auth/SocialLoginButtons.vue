@@ -4,10 +4,7 @@
 			<span>소셜 계정으로 시작하기</span>
 		</div>
 		<div class="d-grid gap-2">
-			<a
-				href="http://localhost:8080/oauth2/authorization/google"
-				class="btn btn-google"
-			>
+			<a :href="`${apiUrl}/oauth2/authorization/google`" class="btn btn-google">
 				<img
 					src="https://www.google.com/favicon.ico"
 					alt="Google"
@@ -15,10 +12,7 @@
 				/>
 				Google로 시작하기
 			</a>
-			<a
-				href="http://localhost:8080/oauth2/authorization/naver"
-				class="btn btn-naver"
-			>
+			<a :href="`${apiUrl}/oauth2/authorization/naver`" class="btn btn-naver">
 				<img
 					src="https://www.naver.com/favicon.ico"
 					alt="Naver"
@@ -26,10 +20,7 @@
 				/>
 				Naver로 시작하기
 			</a>
-			<a
-				href="http://localhost:8080/oauth2/authorization/kakao"
-				class="btn btn-kakao"
-			>
+			<a :href="`${apiUrl}/oauth2/authorization/kakao`" class="btn btn-kakao">
 				<img
 					src="https://developers.kakao.com/assets/img/about/logos/kakaotalksharing/kakaotalk_sharing_btn_medium.png"
 					alt="Kakao"
@@ -40,6 +31,10 @@
 		</div>
 	</div>
 </template>
+
+<script setup>
+const apiUrl = import.meta.env.VITE_APP_API_URL;
+</script>
 
 <style scoped>
 .social-login-buttons {
